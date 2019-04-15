@@ -339,10 +339,10 @@ void callback(void * x, io_service_t y, natural_t messageType, void * messageArg
 	//
 	// They're different because the helper is stripped when it's copied into the alarm clock resources
 	
-	NSString *deployment1 = [NSString stringWithUTF8String:"a5bfc2710627a8507d27aad3b6609951\n"];
-	NSString *deployment2 = [NSString stringWithUTF8String:"453523367c729b509cb308be188612be\n"];
+	NSString *deployment1 = [NSString stringWithUTF8String:"01e6cfd79d311888dec10cba87d32ac8\n"];
+	NSString *deployment2 = [NSString stringWithUTF8String:"a829baefef4320ecdbc1e4e9f93087b4\n"];
 	
-	NSString *development = [NSString stringWithUTF8String:"f07b4e0cd9b3b2f7d481a098d9710a7d\n"];
+	NSString *development = [NSString stringWithUTF8String:"ea1f47ea8fbf1739b76edacabbfbc241\n"];
 	
 	// Deployment build
 	if([output hasSuffix:deployment1] || [output hasSuffix:deployment2])

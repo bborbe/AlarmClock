@@ -167,7 +167,7 @@
 		if([[track objectForKey:@"Track Type"] isEqualToString:@"File"])
 		{
 			// Assume the location points to a standard audio file
-			NSURL *url = [NSURL fileURLWithPath:[track objectForKey:@"Location"]];
+			NSURL *url = [NSURL URLWithString:[track objectForKey:@"Location"]];
 			
 			movie = [[AVPlayer alloc] initWithURL:url];
 			
@@ -328,6 +328,11 @@
 	if(movie != nil)
 	{
 		[movie play];
+		
+		NSError* error = [movie error];
+		if (error) {
+			[[NSApplication sharedApplication] presentError:error];
+		}
 	}
 }
 
