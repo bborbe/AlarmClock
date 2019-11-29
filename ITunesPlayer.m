@@ -14,7 +14,7 @@
 #define TYPE_PLAYLIST  2
 
 @interface ITunesPlayer (PrivateAPI)
-- (void)setMovieWithTrack:(NSDictionary *)track;
+- (void)setMovieWithTrack:(ITLibMediaItem *)track;
 - (void)shufflePlaylist;
 - (double)randomDouble;
 @end
@@ -146,7 +146,7 @@
  * 
  * @param track - An extracted track from the iTunesData dictionary.
 **/
-- (void)setMovieWithTrack:(NSDictionary *)track
+- (void)setMovieWithTrack:(ITLibMediaItem *)track
 {
 	// Stop and release the current movie if needed
 	if(movie != nil)
@@ -156,27 +156,23 @@
 		movie = nil;
 	}
 	
-	// Save reference to this track
-	[currentTrack release];
-	currentTrack = [track retain];
+	// Save info about this track
+	[currentTrack setValue:[track title] forKey:@"Name"];
+	[currentTrack setValue:[[track artist] name] forKey:@"Artist"];
+	[currentTrack setValue:[[track album] title] forKey:@"Album"];
 	
 	// And double-check we're not working with a nil track
 	// This would be the case if we encountered a bogus trackID
 	if(track != nil)
 	{
-		if([[track objectForKey:@"Track Type"] isEqualToString:@"File"])
-		{
-			// Assume the location points to a standard audio file
-			NSURL *url = [NSURL URLWithString:[track objectForKey:@"Location"]];
-			
-			movie = [[AVPlayer alloc] initWithURL:url];
-			
-			// Now we check for any DRM, if necessary
-			if(movie.currentItem.asset.hasProtectedContent) {
-				NSLog(@"Not authorized to play track: %@", [track objectForKey:TRACK_NAME]);
-				[movie release];
-				movie = nil;
-			}
+		// Assume the location points to a standard audio file
+		movie = [[AVPlayer alloc] initWithURL:[track location]];
+		
+		// Now we check for any DRM, if necessary
+		if(movie.currentItem.asset.hasProtectedContent) {
+			NSLog(@"Not authorized to play track: %@", [track title]);
+			[movie release];
+			movie = nil;
 		}
 	}
 }
@@ -234,19 +230,13 @@
 	shouldShuffle = shuffleFlag;
 	
 	// Fetch the desired playlist
-	NSDictionary *playlistDict = [iTunesData playlistForID:playlistID];
-	NSArray *playlistArray = [playlistDict objectForKey:@"Playlist Items"];
+	ITLibPlaylist *playlistObject = [iTunesData playlistForID:playlistID];
+	NSArray<ITLibMediaItem *> *playlistArray = [playlistObject items];
 	
 	// Copy the playlistArray into our own playlist array
 	// And don't forget to recycle the old playlist (since this method may be called multiple times)
 	[playlist autorelease];
-	playlist = [[NSMutableArray alloc] initWithCapacity:[playlistArray count]];
-	
-	int i;
-	for(i = 0; i < [playlistArray count]; i++)
-	{
-		[playlist addObject:[playlistArray objectAtIndex:i]];
-	}
+	playlist = [[playlistArray mutableCopy] retain];
 	
 	// Shuffle the playlist if needed
 	if(shouldShuffle)
@@ -270,14 +260,9 @@
 			// Increment playlistIndex, looping if needed
 			playlistIndex = ++playlistIndex % [playlist count];
 			
-			// Extract the trackID of the playlistIndex out of the playlistArray
-			NSDictionary *dict = [playlist objectAtIndex:playlistIndex];
-			int trackID = [[dict objectForKey:@"Track ID"] intValue];
+			[self setMovieWithTrack:[playlist objectAtIndex:playlistIndex]];
 			
-			// Get the specified track from the iTunesData, and use it to set the movie
-			[self setMovieWithTrack:[iTunesData trackForID:trackID]];
-			
-			// We don't configure the movie to loop, but we still need to set it's volume
+			// We don't configure the movie to loop, but we still need to set its volume
 			[movie setVolume:volumePercentage];
 			
 			// Increment loopCount
@@ -391,14 +376,9 @@
 			[self shufflePlaylist];
 		}
 		
-		// Extract the trackID of the currentPlaylistIndex out of the currentPlaylist
-		NSDictionary *dict = [playlist objectAtIndex:playlistIndex];
-		int trackID = [[dict objectForKey:@"Track ID"] intValue];
+		[self setMovieWithTrack:[playlist objectAtIndex:playlistIndex]];
 		
-		// Get the specified track from the iTunesData, and use it to set the movie
-		[self setMovieWithTrack:[iTunesData trackForID:trackID]];
-		
-		// We don't configure the movie to loop, but we still need to set it's volume
+		// We don't configure the movie to loop, but we still need to set its volume
 		[movie setVolume:volumePercentage];
 		
 		// Increment loopCount
@@ -470,14 +450,9 @@
 			playlistIndex = [playlist count] - 1;
 		}
 		
-		// Extract the trackID of the currentPlaylistIndex out of the currentPlaylist
-		NSDictionary *dict = [playlist objectAtIndex:playlistIndex];
-		int trackID = [[dict objectForKey:@"Track ID"] intValue];
+		[self setMovieWithTrack:[playlist objectAtIndex:playlistIndex]];
 		
-		// Get the specified track from the iTunesData, and use it to set the movie
-		[self setMovieWithTrack:[iTunesData trackForID:trackID]];
-		
-		// We don't configure the movie to loop, but we still need to set it's volume
+		// We don't configure the movie to loop, but we still need to set its volume
 		[movie setVolume:volumePercentage];
 		
 		// Increment loopCount

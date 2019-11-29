@@ -358,3 +358,8 @@ RELEASE 2.5.0 (Bartek Fabiszewski)
 
 Updated to build on MacOS Sierra
 Replaced depreciated functions
+
+RELEASE 2.6.0 (Andy Van Ness)
+
+Updated to build on macOS Catalina, 64-bit
+Replaced XML parsing with iTunesLibrary API for new Music.app

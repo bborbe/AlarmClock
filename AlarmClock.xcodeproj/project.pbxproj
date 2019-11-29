@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D3488632390A0B500FE69D5 /* iTunesLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D3488622390A0B500FE69D5 /* iTunesLibrary.framework */; };
 		15BF23AA1DBA84A2005D1760 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15BF23A91DBA84A2005D1760 /* AVFoundation.framework */; };
 		15BF23AC1DBA84E4005D1760 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15BF23AB1DBA84E4005D1760 /* CoreMedia.framework */; };
 		8D1107280486CEB800E47090 /* AlarmClock_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32CA4F630368D1EE00C91783 /* AlarmClock_Prefix.pch */; };
@@ -56,8 +57,6 @@
 		DC8FAFE806F57A76005B5B92 /* AlarmWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = DC8FAFE606F57A76005B5B92 /* AlarmWindow.nib */; };
 		DC8FAFEB06F57B45005B5B92 /* AlarmController.h in Headers */ = {isa = PBXBuildFile; fileRef = DC8FAFE906F57B45005B5B92 /* AlarmController.h */; };
 		DC8FAFEC06F57B45005B5B92 /* AlarmController.m in Sources */ = {isa = PBXBuildFile; fileRef = DC8FAFEA06F57B45005B5B92 /* AlarmController.m */; };
-		DC97615D09BCCB2700089A08 /* RHAliasHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = DC97615B09BCCB2600089A08 /* RHAliasHandler.h */; };
-		DC97615E09BCCB2700089A08 /* RHAliasHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = DC97615C09BCCB2600089A08 /* RHAliasHandler.m */; };
 		DCA0B3B907B0566900004706 /* AlarmTasks.h in Headers */ = {isa = PBXBuildFile; fileRef = DCA0B3B707B0566900004706 /* AlarmTasks.h */; };
 		DCA0B3BA07B0566900004706 /* AlarmTasks.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA0B3B807B0566900004706 /* AlarmTasks.m */; };
 		DCA0B4D507B072EE00004706 /* helper.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA0B4BC07B071F800004706 /* helper.m */; };
@@ -152,6 +151,7 @@
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0D3488622390A0B500FE69D5 /* iTunesLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iTunesLibrary.framework; path = ../../../../../../System/Library/Frameworks/iTunesLibrary.framework; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		15BF23A91DBA84A2005D1760 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		15BF23AB1DBA84E4005D1760 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
@@ -361,8 +361,6 @@
 		DC8FAFE706F57A76005B5B92 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/AlarmWindow.nib; sourceTree = "<group>"; };
 		DC8FAFE906F57B45005B5B92 /* AlarmController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AlarmController.h; sourceTree = "<group>"; };
 		DC8FAFEA06F57B45005B5B92 /* AlarmController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AlarmController.m; sourceTree = "<group>"; };
-		DC97615B09BCCB2600089A08 /* RHAliasHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RHAliasHandler.h; sourceTree = "<group>"; };
-		DC97615C09BCCB2600089A08 /* RHAliasHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RHAliasHandler.m; sourceTree = "<group>"; };
 		DC9E79580C28F0A200D815DF /* el */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = el; path = el.lproj/Credits.html; sourceTree = "<group>"; };
 		DC9E795B0C28F0EC00D815DF /* el */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = el; path = el.lproj/donate.gif; sourceTree = "<group>"; };
 		DC9E795E0C28F0F800D815DF /* el */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -490,6 +488,7 @@
 				15BF23AA1DBA84A2005D1760 /* AVFoundation.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				DCA0B4DB07B0732C00004706 /* IOKit.framework in Frameworks */,
+				0D3488632390A0B500FE69D5 /* iTunesLibrary.framework in Frameworks */,
 				DCA0B4E307B074A500004706 /* Security.framework in Frameworks */,
 				DC092FE809A9806C004B788B /* CoreAudio.framework in Frameworks */,
 			);
@@ -525,6 +524,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0D3488622390A0B500FE69D5 /* iTunesLibrary.framework */,
 				15BF23A91DBA84A2005D1760 /* AVFoundation.framework */,
 				15BF23AB1DBA84E4005D1760 /* CoreMedia.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
@@ -582,8 +582,6 @@
 				DCA0B4BC07B071F800004706 /* helper.m */,
 				DC10140409D340AB00D84FD8 /* AppleRemote.h */,
 				DC10140509D340AB00D84FD8 /* AppleRemote.m */,
-				DC97615B09BCCB2600089A08 /* RHAliasHandler.h */,
-				DC97615C09BCCB2600089A08 /* RHAliasHandler.m */,
 				DC2E2CD50B59A393001ABCB5 /* RHDateToStringTransformer.h */,
 				DC2E2CD60B59A393001ABCB5 /* RHDateToStringTransformer.m */,
 				DC81FAB9077E02A500F0C1C6 /* CalendarAdditions.h */,
@@ -805,7 +803,6 @@
 				DC1387EB09ACD8AD006ECAB5 /* ITunesPlayer.h in Headers */,
 				DC13880509ACDE72006ECAB5 /* ITunesData.h in Headers */,
 				DC13883009ACE206006ECAB5 /* ITunesTable.h in Headers */,
-				DC97615D09BCCB2700089A08 /* RHAliasHandler.h in Headers */,
 				DC10105409D25A4900D84FD8 /* WindowManager.h in Headers */,
 				DC10140609D340AB00D84FD8 /* AppleRemote.h in Headers */,
 				DCDDE0550A0F24E5008E5191 /* TimerController.h in Headers */,
@@ -983,7 +980,6 @@
 				DC1387EC09ACD8AD006ECAB5 /* ITunesPlayer.m in Sources */,
 				DC13880609ACDE72006ECAB5 /* ITunesData.m in Sources */,
 				DC13883109ACE206006ECAB5 /* ITunesTable.m in Sources */,
-				DC97615E09BCCB2700089A08 /* RHAliasHandler.m in Sources */,
 				DC10105509D25A4900D84FD8 /* WindowManager.m in Sources */,
 				DC10140709D340AB00D84FD8 /* AppleRemote.m in Sources */,
 				DCDDE0560A0F24E5008E5191 /* TimerController.m in Sources */,

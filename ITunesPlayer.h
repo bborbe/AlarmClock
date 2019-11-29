@@ -1,6 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
+#import <iTunesLibrary/iTunesLibrary.h>
 
 @class ITunesData;
 
@@ -23,7 +24,7 @@
 	// Playlist Information
 	BOOL shouldShuffle;
 	NSInteger playlistIndex;
-	NSMutableArray *playlist;
+	NSMutableArray<ITLibMediaItem *> *playlist;
 	
 	// Delegate
 	id delegate;
@@ -46,7 +47,7 @@
 - (void)nextTrack;
 - (void)previousTrack;
 
-- (NSDictionary *)currentTrack;
+- (ITLibMediaItem *)currentTrack;
 
 - (void)setVolume:(float)volume;
 

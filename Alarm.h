@@ -13,8 +13,8 @@
 	int type;
 	int trackID;
 	int playlistID;
-	NSString *persistentTrackID;
-	NSString *persistentPlaylistID;
+	NSNumber *persistentTrackID;
+	NSNumber *persistentPlaylistID;
 	NSDate *time;
 }
 
@@ -54,12 +54,12 @@
 - (void)setType:(int)type;
 
 - (int)trackID;
-- (NSString *)persistentTrackID;
-- (void)setTrackID:(int)trackID withPersistentTrackID:(NSString *)persistentTrackID;
+- (NSNumber *)persistentTrackID;
+- (void)setTrackID:(int)trackID withPersistentTrackID:(NSNumber *)persistentTrackID;
 
 - (int)playlistID;
-- (NSString *)persistentPlaylistID;
-- (void)setPlaylistID:(int)playlistID withPersistentPlaylistID:(NSString *)persistentPlaylistID;
+- (NSNumber *)persistentPlaylistID;
+- (void)setPlaylistID:(int)playlistID withPersistentPlaylistID:(NSNumber *)persistentPlaylistID;
 
 - (NSDate *)time;
 - (void)setTime:(NSDate *)time;

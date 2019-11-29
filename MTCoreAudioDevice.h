@@ -36,8 +36,8 @@ typedef struct _MTCoreAudioVolumeInfo {
 + (MTCoreAudioDevice *) defaultOutputDevice;
 + (MTCoreAudioDevice *) defaultSystemOutputDevice;
 
-- (Float32) volumeForChannel:(UInt32)theChannel forDirection:(MTCoreAudioDirection)theDirection;
-- (void)    setVolume:(Float32)theVolume forChannel:(UInt32)theChannel forDirection:(MTCoreAudioDirection)theDirection;
+- (Float32) volumeForDirection:(MTCoreAudioDirection)theDirection;
+- (void)    setVolume:(Float32)theVolume forDirection:(MTCoreAudioDirection)theDirection;
 - (void)    setMute:(BOOL)isMuted forChannel:(UInt32)theChannel forDirection:(MTCoreAudioDirection)theDirection;
 
 

@@ -139,8 +139,21 @@ static NSUInteger firstDayOfWeek;
 		playlistID   = [[dict objectForKey:PLAYLIST_ID_KEY] intValue];
 		
 		// Get the persistent ID's
-		persistentTrackID = [[dict objectForKey:PERSISTENT_TRACK_ID_KEY] retain];
-		persistentPlaylistID = [[dict objectForKey:PERSISTENT_PLAYLIST_ID_KEY] retain];
+		id storedPersistentTrackID = [dict objectForKey:PERSISTENT_TRACK_ID_KEY];
+		id storedPersistentPlaylistID = [dict objectForKey:PERSISTENT_PLAYLIST_ID_KEY];
+		
+		// Check for data from pre-Catalina version & convert if needed
+		if([storedPersistentTrackID isKindOfClass:[NSString class]] ||
+		   [storedPersistentPlaylistID isKindOfClass:[NSString class]])
+		{
+			persistentTrackID = [[NSNumber numberWithInt:[storedPersistentTrackID intValue]] retain];
+			persistentPlaylistID = [[NSNumber numberWithInt:[storedPersistentPlaylistID intValue]] retain];
+		}
+		else
+		{
+			persistentTrackID = [storedPersistentTrackID retain];
+			persistentPlaylistID = [storedPersistentPlaylistID retain];
+		}
 		
 		// Get the stored time
 		id storedTime = [dict objectForKey:TIME_KEY];
@@ -486,8 +499,8 @@ Returns whether or not the alarm is properly configured to play a playlist.
 
 /**
  Returns the trackID, which may be used to lookup the song in the iTunes library.
- Note that this trackID is NOT persistent across multiple reads of the iTunes Music library XML file.
- The trackID should initially be validated against the persistentTrackID after a new read of the XML file.
+ Note that this trackID is NOT persistent across multiple instances of iTunesData.
+ The trackID should initially be validated against the persistentTrackID after a initializing a new iTunesData instance.
 **/
 - (int)trackID
 {
@@ -496,10 +509,10 @@ Returns whether or not the alarm is properly configured to play a playlist.
 
 /**
  Returns the alarm's persistent Track ID.
- This is a unique identification string that can reliably be used to find a song across multiple XML reads.
+ This is a unique identification string that can reliably be used to find a song across multiple instances of iTunesData.
  The returned value is a reference to the original, and thus should not be altered in any way.
 **/
-- (NSString *)persistentTrackID
+- (NSNumber *)persistentTrackID
 {
 	return persistentTrackID;
 }
@@ -507,11 +520,11 @@ Returns whether or not the alarm is properly configured to play a playlist.
 /**
  Stores the alarm's trackID and persistentTrackID.
  The trackID is used to lookup the song information in the iTunes Music Library.
- The trackID is, however, not persistent across multiple reads of the librarie's XML file.
- The persistentTrackID is used for this, and can be found within the XML file.
+ The trackID is, however, not persistent across multiple instances of iTunesData.
+ The persistentTrackID is used for this.
  This persistent ID can be mapped to a regular track ID, which can in turn be used to quickly lookup the song.
 **/
-- (void)setTrackID:(int)newTrackID withPersistentTrackID:(NSString *)newPersistentTrackID
+- (void)setTrackID:(int)newTrackID withPersistentTrackID:(NSNumber *)newPersistentTrackID
 {
 	// Store the trackID
 	trackID = newTrackID;
@@ -523,8 +536,8 @@ Returns whether or not the alarm is properly configured to play a playlist.
 
 /**
  Returns the playlistID, which may be used to lookup the playlist in the iTunes library.
- Note that this playlistID is NOT persistent across multiple reads of the iTunes Music library XML file.
- The playlistID should initially be validated against the persistentPlaylistID after a new read of the XML file.
+ Note that this playlistID is NOT persistent across multiple instances of iTunesData.
+ The playlistID should initially be validated against the persistentPlaylistID after a new iTunesData is initialized.
 **/
 - (int)playlistID
 {
@@ -533,10 +546,10 @@ Returns whether or not the alarm is properly configured to play a playlist.
 
 /**
  Returns the alarm's persistent Playlist ID.
- This is a unique identification string that can reliably be used to find a playlist across multiple XML reads.
+ This is a unique identification string that can reliably be used to find a playlist across multiple instances of iTunesData.
  The returned value is a reference to the original, and thus should not be altered in any way.
 **/
-- (NSString *)persistentPlaylistID
+- (NSNumber *)persistentPlaylistID
 {
 	return persistentPlaylistID;
 }
@@ -544,11 +557,11 @@ Returns whether or not the alarm is properly configured to play a playlist.
 /**
  Stores the alarm's playlistID and persistentPlaylistID.
  The playlistID is used to lookup the song information in the iTunes Music Library.
- The playlistID is, however, not persistent across multiple reads of the librarie's XML file.
- The persistentPlaylistID is used for this, and can be found within the XML file.
+ The playlistID is, however, not persistent across multiple instances of iTunesData.
+ The persistentPlaylistID is used for this.
  This persistent ID can be mapped to a regular playlist ID, which can in turn be used to quickly lookup the playlist.
 **/
-- (void)setPlaylistID:(int)newPlaylistID withPersistentPlaylistID:(NSString *)newPersistentPlaylistID
+- (void)setPlaylistID:(int)newPlaylistID withPersistentPlaylistID:(NSNumber *)newPersistentPlaylistID
 {
 	// Store the playlistID
 	playlistID = newPlaylistID;
@@ -608,12 +621,12 @@ Returns whether or not the alarm is properly configured to play a playlist.
 	
 	// Compare string variables
 	// If they're both nil, then isEqualToString will return NO, so we also do a standard comparison
-	if(![persistentTrackID isEqualToString:[anAlarm persistentTrackID]]
+	if(![persistentTrackID isEqualToNumber:[anAlarm persistentTrackID]]
 	   && persistentTrackID != [anAlarm persistentTrackID])
 	{
 		return NO;
 	}
-	if(![persistentPlaylistID isEqualToString:[anAlarm persistentPlaylistID]]
+	if(![persistentPlaylistID isEqualToNumber:[anAlarm persistentPlaylistID]]
 	   && persistentPlaylistID != [anAlarm persistentPlaylistID])
 	{
 		return NO;

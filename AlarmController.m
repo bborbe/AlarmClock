@@ -19,6 +19,7 @@
 - (void)playerPreviousTrack;
 - (void)snooze;
 - (void)stop;
+- (void)restoreSystemVolume;
 - (void)setVolume:(float)percent;
 - (void)runAppleScript:(NSObject *)obj;
 @end
@@ -79,8 +80,7 @@
 		
 		// Store the initial system volume
 		// These get restored after the alarm is stopped
-		initialLeftVolume  = [outputDevice volumeForChannel:1 forDirection:kMTCoreAudioDevicePlaybackDirection];
-		initialRightVolume = [outputDevice volumeForChannel:2 forDirection:kMTCoreAudioDevicePlaybackDirection];
+		initialVolume = [outputDevice volumeForDirection:kMTCoreAudioDevicePlaybackDirection];
 		
 		// Configure the volume
 		// The setVolume method automatically takes care of unmuting the volume
@@ -453,7 +453,7 @@
 			// We also allow the user to manually switch between the 2 views
 			if(shouldDisplaySongInfo)
 			{
-				return [[player currentTrack] objectForKey:@"Name"];
+				return [[player currentTrack] title];
 			}
 			else
 			{
@@ -501,7 +501,7 @@
 			// We also allow the user to manually switch between the 2 views
 			if(shouldDisplaySongInfo)
 			{
-				return [[player currentTrack] objectForKey:@"Artist"];
+				return [[[player currentTrack] artist] name];
 			}
 			else
 			{
@@ -756,10 +756,18 @@
 									   userInfo:nil
 										repeats:NO];
 		
-		// Return the system volume to it's original level (before the alarm went off)
-		[outputDevice setVolume:initialLeftVolume forChannel:1 forDirection:kMTCoreAudioDevicePlaybackDirection];
-		[outputDevice setVolume:initialRightVolume forChannel:2 forDirection:kMTCoreAudioDevicePlaybackDirection];
+		// Return the system volume to its original level (before the alarm went off)
+		[NSTimer scheduledTimerWithTimeInterval:0.05
+										 target:self
+									   selector:@selector(restoreSystemVolume)
+									   userInfo:nil
+										repeats:NO];
 	}
+}
+
+- (void)restoreSystemVolume
+{
+	[outputDevice setVolume:initialVolume forDirection:kMTCoreAudioDevicePlaybackDirection];
 }
 
 // Timer Events
@@ -1005,9 +1013,8 @@
 			[outputDevice setMute:NO forChannel:0 forDirection:kMTCoreAudioDevicePlaybackDirection];
 		}
 		
-		// Set volume for left and right speakers, respectively
-		[outputDevice setVolume:alteredPercent forChannel:1 forDirection:kMTCoreAudioDevicePlaybackDirection];
-		[outputDevice setVolume:alteredPercent forChannel:2 forDirection:kMTCoreAudioDevicePlaybackDirection];
+		// Set system volume
+		[outputDevice setVolume:alteredPercent forDirection:kMTCoreAudioDevicePlaybackDirection];
 	}
 }
 

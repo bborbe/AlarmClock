@@ -36,7 +36,7 @@
     IBOutlet id updateIntervalPopup;
 #endif
     IBOutlet id wakeFromSleepButton;
-    IBOutlet id window;
+    IBOutlet NSWindow *window;
 }
 - (IBAction)deauthenticate:(id)sender;
 - (IBAction)setEasyWakeDuration:(id)sender;

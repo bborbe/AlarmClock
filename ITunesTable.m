@@ -95,12 +95,11 @@
 {
 	NSMutableArray *temp = [NSMutableArray array];
 	
-	NSArray *tracks = [[self playlistForIndex:(int)playlistIndex] objectForKey:PLAYLIST_ITEMS];
+	NSArray<ITLibMediaItem *> *tracks = [[self playlistForID:(int)playlistIndex] items];
 	int i;
 	for(i=0; i<[tracks count]; i++)
 	{
-		NSNumber *trackID = [[tracks objectAtIndex:i] objectForKey:TRACK_ID];
-		[temp addObject:trackID];
+		[temp addObject:[NSNumber numberWithInt:[self trackIndexForPersistentID:[[tracks objectAtIndex:i] persistentID]]]];
 	}
 	
 	[table release];
@@ -159,10 +158,10 @@
 		{
 			int index = [[table objectAtIndex:j] intValue];
 			
-			NSDictionary *track = [self trackForID:index];
-			NSString *name   = [track objectForKey:TRACK_NAME];
-			NSString *artist = [track objectForKey:TRACK_ARTIST];
-			NSString *album  = [track objectForKey:TRACK_ALBUM];
+			ITLibMediaItem *track = [self trackForID:index];
+			NSString *name   = [track title];
+			NSString *artist = [[track artist] name];
+			NSString *album  = [[track album] title];
 			
 			if((name != nil) && ([name rangeOfString:str options:NSCaseInsensitiveSearch].location != NSNotFound))
 			{

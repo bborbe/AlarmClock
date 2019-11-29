@@ -1,4 +1,5 @@
 #import <Cocoa/Cocoa.h>
+#import <iTunesLibrary/iTunesLibrary.h>
 
 #define LIBRARY_PERSISTENTID          @"Library Persistent ID"
 #define MUSIC_FOLDER                  @"Music Folder"
@@ -37,25 +38,21 @@
 @interface ITunesData : NSObject
 {
 	// Dictionary with contents of music library xml file
-	NSDictionary *library;
+	ITLibrary *library;
 }
 
 - (id)init;
 
-- (NSArray *)playlists;
+- (NSArray<ITLibPlaylist *> *)playlists;
 
-- (int)playlistIndexForID:(int)playlistID;
+- (ITLibPlaylist *)playlistForID:(int)playlistID;
 
-- (NSDictionary *)playlistForID:(int)playlistID;
-- (NSDictionary *)playlistForIndex:(int)playlistIndex;
+- (ITLibMediaItem *)trackForID:(int)trackID;
 
-- (NSDictionary *)trackForID:(int)trackID;
+- (int)trackIndexForPersistentID:(NSNumber *)trackID;
+- (int)trackIndexForPersistentID:(NSNumber *)trackPersistentID withPlaylistID:(int)playlistID;
 
-- (int)trackIndexForID:(int)trackID;
-- (int)trackIndexForID:(int)trackID withPlaylistID:(int)playlistID;
-- (int)trackIndexForID:(int)trackID withPlaylistIndex:(int)playlistIndex;
-
-- (int)validateTrackID:(int)trackID withPersistentTrackID:(NSString *)persistentTrackID;
-- (int)validatePlaylistID:(int)playlistID withPersistentPlaylistID:(NSString *)persistentPlaylistID;
+- (int)validateTrackID:(int)trackID withPersistentTrackID:(NSNumber *)persistentTrackID;
+- (int)validatePlaylistID:(int)playlistID withPersistentPlaylistID:(NSNumber *)persistentPlaylistID;
 
 @end

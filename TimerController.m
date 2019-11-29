@@ -751,18 +751,16 @@
 			
 			// Store the initial system volume
 			// These get restored after the movie is stopped
-			initialLeftVolume  = [outputDevice volumeForChannel:1 forDirection:kMTCoreAudioDevicePlaybackDirection];
-			initialRightVolume = [outputDevice volumeForChannel:2 forDirection:kMTCoreAudioDevicePlaybackDirection];
+			initialVolume  = [outputDevice volumeForDirection:kMTCoreAudioDevicePlaybackDirection];
 			
 			// Make sure the volume is unmuted
 			[outputDevice setMute:NO forChannel:0 forDirection:kMTCoreAudioDevicePlaybackDirection];
 			
-			// Get preferred alarm volumn
+			// Get preferred alarm volume
 			float preferredVolume = [Prefs prefVolume];
 			
-			// Set volume for left and right speakers, respectively
-			[outputDevice setVolume:preferredVolume forChannel:1 forDirection:kMTCoreAudioDevicePlaybackDirection];
-			[outputDevice setVolume:preferredVolume forChannel:2 forDirection:kMTCoreAudioDevicePlaybackDirection];
+			// Set system volume
+			[outputDevice setVolume:preferredVolume forDirection:kMTCoreAudioDevicePlaybackDirection];
 		}
 		
 		// Deminiaturize the timer window if needed
@@ -809,8 +807,7 @@
 			// Reset the volume to what it was before the timer went off
 			MTCoreAudioDevice *outputDevice = [MTCoreAudioDevice defaultOutputDevice];
 			
-			[outputDevice setVolume:initialLeftVolume  forChannel:1 forDirection:kMTCoreAudioDevicePlaybackDirection];
-			[outputDevice setVolume:initialRightVolume forChannel:2 forDirection:kMTCoreAudioDevicePlaybackDirection];
+			[outputDevice setVolume:initialVolume forDirection:kMTCoreAudioDevicePlaybackDirection];
 		}
 		// Rewind movie
 		[movie.currentItem seekToTime:kCMTimeZero];

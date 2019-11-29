@@ -7,6 +7,7 @@
 //
 
 #import "MTCoreAudioDevice.h"
+#import <AudioToolbox/AudioServices.h>
 
 @implementation MTCoreAudioDevice
 
@@ -54,7 +55,7 @@
 	return self;
 }
 
-- (Float32) volumeForChannel:(UInt32)theChannel forDirection:(MTCoreAudioDirection)theDirection
+- (Float32) volumeForDirection:(MTCoreAudioDirection)theDirection
 {
 	OSStatus theStatus;
 	UInt32 theSize;
@@ -62,9 +63,9 @@
 	
 	theSize = sizeof(Float32);
 	AudioObjectPropertyAddress propertyAddress;
-	propertyAddress.mSelector = kAudioDevicePropertyVolumeScalar;
+	propertyAddress.mSelector = kAudioHardwareServiceDeviceProperty_VirtualMasterVolume;
 	propertyAddress.mScope = (theDirection == kMTCoreAudioDevicePlaybackDirection)  ? kAudioDevicePropertyScopeOutput : kAudioDevicePropertyScopeInput;
-	propertyAddress.mElement = theChannel;
+	propertyAddress.mElement = kAudioObjectPropertyElementMaster;
 	theStatus = AudioObjectGetPropertyData( myDevice, &propertyAddress, 0, NULL, &theSize, &theVolumeScalar );
 	if (theStatus == 0)
 		return theVolumeScalar;
@@ -72,15 +73,15 @@
 		return 0.0;
 }
 
-- (void) setVolume:(Float32)theVolume forChannel:(UInt32)theChannel forDirection:(MTCoreAudioDirection)theDirection
+- (void) setVolume:(Float32)theVolume forDirection:(MTCoreAudioDirection)theDirection
 {
 	UInt32 theSize;
 	
 	theSize = sizeof(Float32);
     AudioObjectPropertyAddress propertyAddress;
-    propertyAddress.mSelector = kAudioDevicePropertyVolumeScalar;
+    propertyAddress.mSelector = kAudioHardwareServiceDeviceProperty_VirtualMasterVolume;
     propertyAddress.mScope = (theDirection == kMTCoreAudioDevicePlaybackDirection)  ? kAudioDevicePropertyScopeOutput : kAudioDevicePropertyScopeInput;
-    propertyAddress.mElement = theChannel;
+    propertyAddress.mElement = kAudioObjectPropertyElementMaster;
     AudioObjectSetPropertyData( myDevice, &propertyAddress, 0, NULL, theSize, &theVolume );
 }
 

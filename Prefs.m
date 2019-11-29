@@ -20,7 +20,6 @@
 
 // Hidden Preferences
 #define FIRST_RUN_KEY          @"FirstRun"
-#define XML_PATH_KEY           @"XMLPath"
 #define DIGITAL_AUDIO_KEY      @"DigitalAudio"
 
 
@@ -64,7 +63,6 @@
 		
 		// Hidden Preferences
 		[defaultValues setObject:[NSNumber numberWithBool:YES] forKey:FIRST_RUN_KEY];
-		[defaultValues setObject:@"" forKey:XML_PATH_KEY];
 		[defaultValues setObject:[NSNumber numberWithBool:NO] forKey:DIGITAL_AUDIO_KEY];
 		
 		// Register default values
@@ -229,11 +227,6 @@
 + (void)setIsFirstRun:(BOOL)flag
 {
 	[[NSUserDefaults standardUserDefaults] setBool:flag forKey:FIRST_RUN_KEY];
-}
-
-+ (NSString *)xmlPath
-{
-	return [[NSUserDefaults standardUserDefaults] stringForKey:XML_PATH_KEY];
 }
 
 + (BOOL)digitalAudio

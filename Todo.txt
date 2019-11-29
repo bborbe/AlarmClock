@@ -35,7 +35,6 @@ For Future RELEASE
 
 GENERAL TODO:
 
-Add support for XMLPath to be an alias
 Command-W to close stopwatch and timer windows.
 Auto mute audio when mouse first moves after starting alarm.
 Automatically pause iTunes if it's playing AND IF it's open

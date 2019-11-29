@@ -49,8 +49,6 @@
 + (BOOL)isFirstRun;
 + (void)setIsFirstRun:(BOOL)flag;
 
-+ (NSString *)xmlPath;
-
 + (BOOL)digitalAudio;
 
 @end

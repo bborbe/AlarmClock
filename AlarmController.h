@@ -63,11 +63,9 @@
 	NSString *stopStr;
 	NSString *timeStr;
 	
-	// Initial system volumes
 	// This is the volume the system was at before the alarm went off
 	// We store this, so that after the alarm is stopped, we can restore the system volume for the user
-	float initialLeftVolume;
-	float initialRightVolume;
+	float initialVolume;
 	
 	// Interface builder outlets
     IBOutlet id roundedView;

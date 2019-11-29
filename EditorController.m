@@ -10,7 +10,7 @@
 @interface EditorController (PrivateAPI)
 - (void)parseITunesMusicLibrary;
 - (void)setupPlaylistMenu;
-- (void)addPlaylistItemsWithFolder:(NSString *)parentID indentation:(int)level;
+- (void)addPlaylistItemsWithFolder:(NSNumber *)parentID indentation:(int)level;
 - (void)setIsEnabled:(BOOL)status;
 - (void)updateTimeImage;
 - (void)updateSearchLabel;
@@ -294,24 +294,24 @@
 			// If we're using a playlist, we don't have to worry about the trackIndex
 			
 			trackIndex = -1;
-			playlistIndex = [data playlistIndexForID:[alarm playlistID]];
+			playlistIndex = [alarm playlistID];
 		}
 		else if([alarm isTrack])
 		{
 			// First try to get a trackIndex within the playlist
-			trackIndex = [data trackIndexForID:[alarm trackID] withPlaylistID:[alarm playlistID]];
+			trackIndex = [data trackIndexForPersistentID:[alarm persistentTrackID] withPlaylistID:[alarm playlistID]];
 			if(trackIndex >= 0)
 			{
 				// The track was found in the playlist!
 				// Grab the playlist index, and we're ready to rock and roll!
-				playlistIndex = [data playlistIndexForID:[alarm playlistID]];
+				playlistIndex = [alarm playlistID];
 			}
 			else
 			{
 				// The track wasn't found in the playlist.
 				// So we can ignore the playlist now, and just lookup the track in the library
 				
-				trackIndex = [data trackIndexForID:[alarm trackID]];
+				trackIndex = [data trackIndexForPersistentID:[alarm persistentPlaylistID]];
 				playlistIndex = -1;
 			}
 		}
@@ -423,29 +423,14 @@
 	
 	int i;
 	
-	// Playlist Order, as set in iTunes:
-	// 
-	// #define PLAYLIST_TYPE_MASTER        @"Master"
-	// #define PLAYLIST_TYPE_MUSIC         @"Music"
-	// #define PLAYLIST_TYPE_MOVIES        @"Movies"
-	// #define PLAYLIST_TYPE_TVSHOWS       @"TV Shows"
-	// #define PLAYLIST_TYPE_PODCASTS      @"Podcasts"
-	// #define PLAYLIST_TYPE_VIDEOS        @"Videos"
-	// #define PLAYLIST_TYPE_AUDIOBOOKS    @"Audiobooks"
-	// #define PLAYLIST_TYPE_PURCHASED     @"Purchased Music"
-	// #define PLAYLIST_TYPE_PARTYSHUFFLE  @"Party Shuffle"
-	// #define PLAYLIST_TYPE_FOLDER        @"Folder"
-	// #define PLAYLIST_TYPE_SMART         @"Smart Info"
-	// Normal playlists...
-	
 	// Library
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_MASTER])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist isMaster])
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesLibrary.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -455,11 +440,11 @@
 	// Music
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_MUSIC])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindMusic)
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesMusic.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -469,11 +454,11 @@
 	// Movies
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_MOVIES])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindMovies)
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesMovies.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -483,11 +468,11 @@
 	// TV Shows
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_TVSHOWS])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindTVShows)
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesTVShows.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -497,11 +482,11 @@
 	// Podcasts
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_PODCASTS])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindPodcasts)
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesPodcasts.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -511,11 +496,13 @@
 	// Videos
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_VIDEOS])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindHomeVideos ||
+		   [currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindMusicVideos ||
+		   [currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindLibraryMusicVideos)
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesVideos.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -525,11 +512,11 @@
 	// Audiobooks
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_AUDIOBOOKS])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindAudiobooks)
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesAudiobooks.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -539,26 +526,12 @@
 	// Purchased Music
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_PURCHASED])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindPurchases)
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesPurchasedMusic.png"]];
-			[temp setTag:i];
-			[[playlists menu] addItem:temp];
-		}
-	}
-	
-	// Party Shuffle
-	for(i = 0; i < [[data playlists] count]; i++)
-	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_PARTYSHUFFLE])
-		{
-			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
-			[temp setImage:[NSImage imageNamed:@"iTunesPartyShuffle.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
 		}
@@ -567,28 +540,30 @@
 	// Folders
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_FOLDER] && ![currentPlaylist objectForKey:PLAYLIST_PARENT_PERSISTENTID])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist kind] == ITLibPlaylistKindFolder && ![currentPlaylist parentID])
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesFolder.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
 			
 			// Add sub-folders and folder items
-			[self addPlaylistItemsWithFolder:[currentPlaylist objectForKey:PLAYLIST_PERSISTENTID] indentation:1];
+			[self addPlaylistItemsWithFolder:[currentPlaylist persistentID] indentation:1];
 		}
 	}
 	
 	// Smart Playlists
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if([currentPlaylist objectForKey:PLAYLIST_TYPE_SMART])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindNone &&
+		   [currentPlaylist kind] == ITLibPlaylistKindSmart &&
+		   ![currentPlaylist parentID])
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesSmartPlaylist.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -598,22 +573,14 @@
 	// Normal Playlists
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
-		if(![currentPlaylist objectForKey:PLAYLIST_TYPE_MASTER] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_MUSIC] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_MOVIES] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_TVSHOWS] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_PODCASTS] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_VIDEOS] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_AUDIOBOOKS] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_PURCHASED] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_PARTYSHUFFLE] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_FOLDER] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_PARENT_PERSISTENTID] &&
-		   ![currentPlaylist objectForKey:PLAYLIST_TYPE_SMART])
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
+		if([currentPlaylist distinguishedKind] == ITLibDistinguishedPlaylistKindNone &&
+		   ![currentPlaylist isMaster] &&
+		   [currentPlaylist kind] == ITLibPlaylistKindRegular &&
+		   ![currentPlaylist parentID])
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setImage:[NSImage imageNamed:@"iTunesPlaylist.png"]];
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
@@ -624,23 +591,23 @@
 /**
  Recursively adds folders (since folders may be nested), and their internal playlists
 **/
-- (void)addPlaylistItemsWithFolder:(NSString *)parentID indentation:(int)level
+- (void)addPlaylistItemsWithFolder:(NSNumber *)parentID indentation:(int)level
 {
 	int i;
 	
 	for(i = 0; i < [[data playlists] count]; i++)
 	{
-		NSDictionary *currentPlaylist = [[data playlists] objectAtIndex:i];
+		ITLibPlaylist *currentPlaylist = [[data playlists] objectAtIndex:i];
 		
-		if([[currentPlaylist objectForKey:PLAYLIST_PARENT_PERSISTENTID] isEqualToString:parentID])
+		if([[currentPlaylist parentID] isEqualToNumber:parentID])
 		{
 			NSMenuItem *temp = [[[NSMenuItem alloc] init] autorelease];
-			[temp setTitle:[currentPlaylist objectForKey:PLAYLIST_NAME]];
+			[temp setTitle:[currentPlaylist name]];
 			[temp setIndentationLevel:level];
 			
-			if([currentPlaylist objectForKey:PLAYLIST_TYPE_FOLDER])
+			if([currentPlaylist kind] == ITLibPlaylistKindFolder)
 				[temp setImage:[NSImage imageNamed:@"iTunesFolder.png"]];
-			else if([currentPlaylist objectForKey:PLAYLIST_TYPE_SMART])
+			else if([currentPlaylist kind] == ITLibPlaylistKindSmart)
 				[temp setImage:[NSImage imageNamed:@"iTunesSmartPlaylist.png"]];
 			else
 				[temp setImage:[NSImage imageNamed:@"iTunesPlaylist.png"]];
@@ -648,9 +615,9 @@
 			[temp setTag:i];
 			[[playlists menu] addItem:temp];
 			
-			if([currentPlaylist objectForKey:PLAYLIST_TYPE_FOLDER])
+			if([currentPlaylist kind] == ITLibPlaylistKindFolder)
 			{
-				[self addPlaylistItemsWithFolder:[currentPlaylist objectForKey:PLAYLIST_PERSISTENTID] indentation:(level+1)];
+				[self addPlaylistItemsWithFolder:[currentPlaylist persistentID] indentation:(level+1)];
 			}
 		}
 	}
@@ -917,13 +884,12 @@
 	// Perform switch on table
 	[data setPlaylist:playlistIndex];
 		
-	// Get playlist dictionary
-	NSDictionary *playlist = [[data playlists] objectAtIndex:playlistIndex];
+	// Get playlist
+	ITLibPlaylist *playlist = [[data playlists] objectAtIndex:playlistIndex];
 	
 	// Update alarm playlist and type
-	int playlistID = [[playlist objectForKey:@"Playlist ID"] intValue];
-	NSString *persistentPlaylistID = [playlist objectForKey:@"Playlist Persistent ID"];
-	[alarm setPlaylistID:playlistID withPersistentPlaylistID:persistentPlaylistID];
+	NSNumber *persistentPlaylistID = [playlist persistentID];
+	[alarm setPlaylistID:(int)playlistIndex withPersistentPlaylistID:persistentPlaylistID];
 	[alarm setType:ALARMTYPE_PLAYLIST];
 	
 	// Clear search field
@@ -1016,20 +982,19 @@
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)col row:(int)rowIndex
 {
 	int trackID = [[[data table] objectAtIndex:rowIndex] intValue];
-	NSDictionary *track = [data trackForID:trackID];
+	ITLibMediaItem *track = [data trackForID:trackID];
 	
 	if([@"Song" isEqualToString:[col identifier]])
 	{
-		return [track objectForKey:TRACK_NAME];
+		return [track title];
 	}
 	else if([@"Artist" isEqualToString:[col identifier]])
 	{
-		return [track objectForKey:TRACK_ARTIST];
+		return [[track artist] name];
 	}
 	else
 	{
-		NSNumber *time = [track objectForKey:TRACK_TOTALTIME];
-		int millis = [time intValue];
+		int millis = (int)[track totalTime];
 		int totalSeconds = millis / 1000;
 		int minutes = totalSeconds / 60;
 		int seconds = totalSeconds % 60;
@@ -1088,8 +1053,8 @@
 		int trackID = [[[data table] objectAtIndex:[table selectedRow]] intValue];
 		
 		// Now grab the Track dictionary
-		NSDictionary *track = [data trackForID:trackID];
-		NSString *persistentTrackID = [track objectForKey:TRACK_PERSISTENTID];
+		ITLibMediaItem *track = [data trackForID:trackID];
+		NSNumber *persistentTrackID = [track persistentID];
 		
 		// Set the alarm file and type
 		[alarm setTrackID:trackID withPersistentTrackID:persistentTrackID];
@@ -1312,7 +1277,7 @@
 	
 	if([alarm isPlaylist])
 	{
-		NSString *playlistName = [[data playlistForID:[alarm playlistID]] objectForKey:@"Name"];
+		NSString *playlistName = [[data playlistForID:[alarm playlistID]] name];
 		if(playlistName != nil)
 		{
 			NSString *format  = NSLocalizedStringFromTable(@"Playlist: %@", @"AlarmEditor", @"Song label when using a playlist");
@@ -1330,7 +1295,7 @@
 	}
 	else if([alarm isTrack])
 	{
-		NSString *songName = [[data trackForID:[alarm trackID]] objectForKey:@"Name"];
+		NSString *songName = [[data trackForID:[alarm trackID]] title];
 		if(songName != nil)
 		{
 			NSString *format = NSLocalizedStringFromTable(@"Song: %@", @"AlarmEditor", @"Song label when using a song");

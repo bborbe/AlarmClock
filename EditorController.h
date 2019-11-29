@@ -43,7 +43,7 @@
     IBOutlet id songLabel;
     IBOutlet id statusButton;
     IBOutlet id sunMoonImage;
-    IBOutlet id table;
+    IBOutlet NSTableView *table;
     IBOutlet id tabView;
     IBOutlet id timeField;
 }

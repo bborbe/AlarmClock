@@ -1,11 +1,5 @@
 #import "ITunesData.h"
 #import "Prefs.h"
-#import "RHAliasHandler.h"
-
-// Declare private API
-@interface ITunesData (PrivateAPI)
-- (NSString *)locateITunesMusicLibrary;
-@end
 
 @implementation ITunesData
 
@@ -16,24 +10,11 @@
 {
 	if(self = [super init])
 	{
-		// Get path of iTunes Music Library file
-		
-		// First we check the preferences to see if an override exists
-		NSString *xmlPath = [Prefs xmlPath];
-		
-		// If an override doesn't exist, we search for the location of the file
-		if([xmlPath isEqualToString:@""])
-		{
-			xmlPath = [self locateITunesMusicLibrary];
-			NSLog(@"Found iTunes library: %@", xmlPath);
+		NSError * error = nil;
+		library = [[ITLibrary alloc] initWithAPIVersion:@"1.0" error: &error];
+		if (error) {
+			[[NSApplication sharedApplication] presentError:error];
 		}
-		else
-		{
-			NSLog(@"Using configured XMLPath: %@", xmlPath);
-		}
-		
-		// Load iTunes Music Library xml/plist file
-		library = [[NSDictionary alloc] initWithContentsOfFile:xmlPath];
 	}
 	return self;
 }
@@ -43,37 +24,6 @@
 	NSLog(@"Destroying %@", self);
 	[library release];
 	[super dealloc];
-}
-
-// SEARCHING FOR ITUNES MUSIC LIBRARY
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- Searches for the location of the "iTunes Music Library.xml" file.
- In order to do this, it follows the same search pattern that iTunes follows.
- Most of the logic behind this search is based on the information from here:
- http://www.indyjt.com/blog/?p=51
-*/
-- (NSString *)locateITunesMusicLibrary
-{
-	NSString *xmlPath1 = [@"~/Music/iTunes/iTunes Music Library.xml" stringByExpandingTildeInPath];
-	NSString *xmlPath2 = [@"~/Documents/iTunes/iTunes Music Library.xml" stringByExpandingTildeInPath];
-	NSArray *locations = [NSArray arrayWithObjects:xmlPath1, xmlPath2, nil];
-	
-	int i;
-	BOOL found = NO;
-	NSString *xmlPath = nil;
-	for(i = 0; i < [locations count] && !found; i++)
-	{
-		xmlPath = [RHAliasHandler resolvePath:[locations objectAtIndex:i]];
-				
-		found = [[NSFileManager defaultManager] fileExistsAtPath:xmlPath];
-	}
-	
-	if(found)
-		return xmlPath;
-	else
-		return nil;
 }
 
 // DATA EXTRACTION
@@ -89,40 +39,9 @@
  Playlist ID - Unique ID number of playlist, which should be used as name and index in array may change over time.
  Playlist Items - Array of dictionaries, each containing a track ID number.
 **/
-- (NSArray *)playlists
+- (NSArray<ITLibPlaylist *> *)playlists
 {
-	return [library objectForKey:@"Playlists"];
-}
-
-/**
- Returns the array index of the playlist with the given playlist ID.
- 
- Although playlists are stored in an array, and referenced via their array index, this index is obviously not permanent.
- That is, the playlist index may be different upon a different parse of the iTunes library.
- The playlist ID is thus often used to identify a particular playlist.
- This method returns the index in the playlists array which may be used to access it.
- If the playlistID is not found, -1 is returned.
-**/
-- (int)playlistIndexForID:(int)playlistID
-{
-	NSArray *playlists = [self playlists];
-	
-	int index = 0;
-	BOOL found = NO;
-	while(!found && (index < [playlists count]))
-	{
-		NSDictionary *playlist = [playlists objectAtIndex:index];
-		
-		if([[playlist objectForKey:PLAYLIST_ID] intValue] == playlistID)
-			found = YES;
-		else
-			index++;
-	}
-	
-	if(found)
-		return index;
-	else
-		return -1;
+	return [library allPlaylists];
 }
 
 /**
@@ -132,28 +51,14 @@ Returns the playlist that has the given playlist ID.
  When this is found, it is returned.
  Otherwise, nil is returned.
  
- @param playlistID - The ID of the desired playlist in the XML database.
+ @param playlistID - The index of the desired playlist in the library's playlists array.
  **/
-- (NSDictionary *)playlistForID:(int)playlistID
+- (ITLibPlaylist *)playlistForID:(int)playlistID
 {
-	int playlistIndex = [self playlistIndexForID:playlistID];
-	if(playlistIndex >= 0)
-		return [self playlistForIndex:playlistIndex];
+	if(playlistID >= 0)
+		return [[self playlists] objectAtIndex:playlistID];
 	else
 		return nil;
-}
-
-/**
- Returns the playlist dictionary for the given index (in the array)
-  
- Same as [[data playlists] objectAtIndex:playlistIndex]
- Here as a convenience method to make code look prettier and more understandable.
- 
- @param playlistIndex - The index of the desired playlist, in the array of playlists.
-*/
-- (NSDictionary *)playlistForIndex:(int)playlistIndex
-{
-	return [[self playlists] objectAtIndex:playlistIndex];
 }
 
 /**
@@ -166,11 +71,18 @@ Returns the playlist that has the given playlist ID.
  Total Time - Number of milliseconds in song
  Location - File URL
  
- @param trackID - The ID of the desired track in the XML database.
+ @param trackID - The ID of the desired track in the library's `allMediaItems` array.
 **/
-- (NSDictionary *)trackForID:(int)trackID
+- (ITLibMediaItem *)trackForID:(int)trackID
 {
-	return [[library objectForKey:@"Tracks"] objectForKey:[NSString stringWithFormat:@"%i",trackID]];
+	if (trackID < [[library allMediaItems] count])
+	{
+		return [[library allMediaItems] objectAtIndex:trackID];
+	}
+	else
+	{
+		return nil;
+	}
 }
 
 /**
@@ -182,12 +94,12 @@ Returns the playlist that has the given playlist ID.
  If the track is found in the library, the index of the track is returned.
  If it's not found, -1 is returned.
  
- @param trackID - The ID of the desired track in the XML database.
+ @param trackID - The persistent ID of the desired track.
 **/
-- (int)trackIndexForID:(int)trackID
+- (int)trackIndexForPersistentID:(NSNumber *)trackID
 {
 	// Note: The main library is always the first playlist
-	return [self trackIndexForID:trackID withPlaylistIndex:0];
+	return [self trackIndexForPersistentID:trackID withPlaylistID:0];
 }
 
 /**
@@ -199,31 +111,10 @@ Returns the playlist that has the given playlist ID.
  If the track is found in the given playlist, the index of the track is returned.
  If it's not found, -1 is returned.
  
- @param trackID - The ID of the desired track in the XML database.
- @param playlistID - The ID of the playlist that should be searched for the position of the given track.
-**/
-- (int)trackIndexForID:(int)trackID withPlaylistID:(int)playlistID
-{
-	// Convert the playlistID into it's playlistIndex
-	int playlistIndex = [self playlistIndexForID:playlistID];
-	
-	// And lookup the trackIndex within the playlistIndex
-	return [self trackIndexForID:trackID withPlaylistIndex:playlistIndex];
-}
-
-/**
- Returns the index of the track (in the given playlist) for the given track ID.
- 
- Although tracks are stored in a dictionary, and accessed via a key (their track ID),
- an index may be needed when displaying the information in a table, and needing the position of the track.
- 
- If the track is found in the given playlist, the index of the track is returned.
- If it's not found, -1 is returned.
- 
- @param trackID - The ID of the desired track in the XML database.
+ @param trackID - The persistent ID of the desired track.
  @param playlistIndex - The index of the playlist that should be searched for the position of the given track.
 **/
-- (int)trackIndexForID:(int)trackID withPlaylistIndex:(int)playlistIndex
+- (int)trackIndexForPersistentID:(NSNumber *)trackPersistentID withPlaylistID:(int)playlistIndex
 {
 	// First make sure the playlistIndex is valid
 	if((playlistIndex < 0) || (playlistIndex >= [[self playlists] count]))
@@ -231,15 +122,15 @@ Returns the playlist that has the given playlist ID.
 		return -1;
 	}
 	
-	NSArray *playlist = [[self playlistForIndex:playlistIndex] objectForKey:PLAYLIST_ITEMS];
+	NSArray<ITLibMediaItem *> *playlist = [[self playlistForID:playlistIndex] items];
 	
 	int index = 0;
 	BOOL found = NO;
 	while(!found && (index < [playlist count]))
 	{
-		NSString *trackRef = [[playlist objectAtIndex:index] objectForKey:TRACK_ID];
+		NSNumber* trackRef = [[playlist objectAtIndex:index] persistentID];
 		
-		if(trackID == [trackRef intValue])
+		if([trackPersistentID isEqualToNumber:trackRef])
 			found = YES;
 		else
 			index++;
@@ -258,21 +149,21 @@ Returns the playlist that has the given playlist ID.
 /**
  Returns the proper trackID for the given persistentID.
  
- Track ID's are not persistent across multiple creations of the "iTunes Music Library.xml" file from iTunes.
- Thus storing the trackID will not guarantee the same song will be played upon the next XML parse.
- Luckily apple provides a persistentID which may be used to lookup a song across multiple XML parses.
+ Track ID's are not persistent across multiple instances of iTunesData.
+ Thus storing the trackID will not guarantee the same song will be played after the music library is altered.
+ Luckily Apple provides a persistentID which may be used to lookup a song.
  However, the trackID is the key in which to lookup the song, so it is more or less necessary.
  
- This method provides a means with which to map a persistentID to it's corresponding trackID.
+ This method provides a means with which to map a persistentID to its corresponding trackID.
  The trackID which is assumed to be correct is passed along with it.
  This helps, because often times it is correct, and thus a search may be avoided.
  
  @param trackID - The old trackID that was used for the song with this persistentID.
- @param persistentTrackID - This is the persistentID for the song, which doesn't change between XML parses.
+ @param persistentTrackID - This is the persistentID for the song, which doesn't change as the library is altered.
  
  @return The trackID that currently corresponds to the given persistentID, or -1 if the persistentID was not found.
 **/
-- (int)validateTrackID:(int)trackID withPersistentTrackID:(NSString *)persistentTrackID
+- (int)validateTrackID:(int)trackID withPersistentTrackID:(NSNumber *)persistentTrackID
 {
 	// Ignore the validation request if the persistentTrackID is nil (uninitialized)
 	// This will happen for new alarms
@@ -283,50 +174,50 @@ Returns the playlist that has the given playlist ID.
 	}
 	
 	// Get the track for the specified trackID
-	NSDictionary *dict = [self trackForID:trackID];
+	ITLibMediaItem *item = [self trackForID:trackID];
 	
 	// Does the persistentID match the one given
-	if((dict != nil) && [[dict objectForKey:TRACK_PERSISTENTID] isEqualToString:persistentTrackID])
+	if((item != nil) && [[item persistentID] isEqualToNumber:persistentTrackID])
 	{
-		// It's a match.! Just return the original trackID.
+		// It's a match! Just return the original trackID.
 		return trackID;
 	}
 	
 	// The trackID has changed!
 	// Now we have to loop through the tracks, and find the one with the correct persistentID
-	NSEnumerator *enumerator = [[library objectForKey:@"Tracks"] objectEnumerator];
-	NSDictionary *currentTrack;
-	BOOL found = NO;
+	int result = -1;
 		
-	while(!found && (currentTrack = [enumerator nextObject]))
+	for (int i = 0; i < [[library allMediaItems] count]; i++)
 	{
-		found = [[currentTrack objectForKey:TRACK_PERSISTENTID] isEqualToString:persistentTrackID];
+		ITLibMediaItem *currentTrack = [[library allMediaItems] objectAtIndex:i];
+		if ([[currentTrack persistentID] isEqualToNumber:persistentTrackID])
+		{
+			result = i;
+			break;
+		}
 	}
 	
-	if(found)
-		return [[currentTrack objectForKey:TRACK_ID] intValue];
-	else
-		return -1;
+	return result;
 }
 
 /**
  Returns the proper playlistID for the given persistentID.
  
- Playlist ID's are not persistent across multiple creations of the "iTunes Music Library.xml" file from iTunes.
- Thus storing the playlistID will not guarantee the same playlist will be played upon the next XML parse.
- Luckily apple provides a persistentID which may be used to lookup a playlist across multiple XML parses.
+ Playlist ID's are not persistent across multiple instances of iTunesData.
+ Thus storing the playlistID will not guarantee the same playlist will be played after the music library is altered.
+ Luckily Apple provides a persistentID which may be used to lookup a playlist.
  However, the playlistID is the key in which to lookup the playlist, so it is more or less necessary.
  
- This method provides a means with which to map a persistentID to it's corresponding playlistID.
+ This method provides a means with which to map a persistentID to its corresponding playlistID.
  The playlistID which is assumed to be correct is passed along with it.
  This helps, because often times it is correct, and thus a search may be avoided.
  
  @param playlistID - The old playlistID that was used for the song with this persistentID.
- @param persistentPlaylistID - This is the persistentID for the playlist, which doesn't change between XML parses.
+ @param persistentPlaylistID - This is the persistentID for the playlist, which doesn't change as the library is altered.
  
  @return The playlistID that currently corresponds to the given persistentID, or -1 if the persistentID was not found.
 **/
-- (int)validatePlaylistID:(int)playlistID withPersistentPlaylistID:(NSString *)persistentPlaylistID
+- (int)validatePlaylistID:(int)playlistID withPersistentPlaylistID:(NSNumber *)persistentPlaylistID
 {
 	// Ignore the validation request if the persistentPlaylistID is nil (uninitialized)
 	// This will happen for new alarms
@@ -336,31 +227,31 @@ Returns the playlist that has the given playlist ID.
 		return playlistID;
 	}
 	
-	// Get the track for the specified trackID
-	NSDictionary *dict = [self playlistForID:playlistID];
+	// Get the playlist for the specified playlistID
+	ITLibPlaylist *playlist = [self playlistForID:playlistID];
 	
 	// Does the persistentID match the one given
-	if((dict != nil) && [[dict objectForKey:PLAYLIST_PERSISTENTID] isEqualToString:persistentPlaylistID])
+	if((playlist != nil) && [[playlist persistentID] isEqualToNumber:persistentPlaylistID])
 	{
-		// It's a match.! Just return the original trackID.
+		// It's a match.! Just return the original playlistID.
 		return playlistID;
 	}
 	
-	// The trackID has changed!
-	// Now we have to loop through the tracks, and find the one with the correct persistentID
-	NSEnumerator *enumerator = [[library objectForKey:@"Playlists"] objectEnumerator];
-	NSDictionary *currentPlaylist;
-	BOOL found = NO;
-	
-	while(!found && (currentPlaylist = [enumerator nextObject]))
+	// The playlistID has changed!
+	// Now we have to loop through the playlists, and find the one with the correct persistentID
+	int result = -1;
+		
+	for (int i = 0; i < [[library allPlaylists] count]; i++)
 	{
-		found = [[currentPlaylist objectForKey:PLAYLIST_PERSISTENTID] isEqualToString:persistentPlaylistID];
+		ITLibPlaylist *currentPlaylist = [[library allPlaylists] objectAtIndex:i];
+		if ([[currentPlaylist persistentID] isEqualToNumber:persistentPlaylistID])
+		{
+			result = i;
+			break;
+		}
 	}
 	
-	if(found)
-		return [[currentPlaylist objectForKey:PLAYLIST_ID] intValue];
-	else
-		return -1;
+	return result;
 }
 
 @end
