@@ -125,16 +125,8 @@
 												 name:AVPlayerItemDidPlayToEndTimeNotification
 											   object:[movie currentItem]];
 	
-	// Create a dictionary with "track" information
-	NSString *defaultStr = NSLocalizedStringFromTable(@"Default Alarm", @"AlarmEditor", @"Song label when no track/playlist is selected.");
-	
-	NSMutableDictionary *temp = [NSMutableDictionary dictionary];
-	[temp setObject:defaultStr forKey:@"Name"];
-	[temp setObject:@"" forKey:@"Artist"];
-	[temp setObject:@"" forKey:@"Album"];
-	
 	[currentTrack release];
-	currentTrack = [temp copy];
+	currentTrack = nil;
 }
 
 /**
@@ -157,9 +149,8 @@
 	}
 	
 	// Save info about this track
-	[currentTrack setValue:[track title] forKey:@"Name"];
-	[currentTrack setValue:[[track artist] name] forKey:@"Artist"];
-	[currentTrack setValue:[[track album] title] forKey:@"Album"];
+	[currentTrack release];
+	currentTrack = [track retain];
 	
 	// And double-check we're not working with a nil track
 	// This would be the case if we encountered a bogus trackID
@@ -474,7 +465,7 @@
 /**
  Returns a dictionary with information about the currently playing song.
 **/
-- (NSDictionary *)currentTrack
+- (ITLibMediaItem *)currentTrack
 {
 	return currentTrack;
 }

@@ -18,7 +18,7 @@
 	float volumePercentage;
 	
 	// Current type (file, track, playlist), and information
-	NSDictionary *currentTrack;
+	ITLibMediaItem *currentTrack;
 	int type;
 	
 	// Playlist Information

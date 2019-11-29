@@ -453,7 +453,14 @@
 			// We also allow the user to manually switch between the 2 views
 			if(shouldDisplaySongInfo)
 			{
-				return [[player currentTrack] title];
+				if([player currentTrack])
+				{
+					return [[player currentTrack] title];
+				}
+				else
+				{
+					return NSLocalizedStringFromTable(@"Default Alarm", @"AlarmEditor", @"Song label when no track/playlist is selected.");
+				}
 			}
 			else
 			{

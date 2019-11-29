@@ -334,15 +334,9 @@ void callback(void * x, io_service_t y, natural_t messageType, void * messageArg
 	// Update: A simple hex dump of an application file in TextWrangler reveals
 	// @"" constant strings, but not C strings, so the CocoaDev poster seems somewhat credible.
 	
-	// Deployment1 = The helper version inside the alarm clock application
-	// Deployment2 = The helper version when it's compiled by itself
-	//
-	// They're different because the helper is stripped when it's copied into the alarm clock resources
-	
-	NSString *deployment1 = [NSString stringWithUTF8String:"01e6cfd79d311888dec10cba87d32ac8\n"];
-	NSString *deployment2 = [NSString stringWithUTF8String:"a829baefef4320ecdbc1e4e9f93087b4\n"];
-	
-	NSString *development = [NSString stringWithUTF8String:"ea1f47ea8fbf1739b76edacabbfbc241\n"];
+	NSString *deployment1 = [NSString stringWithUTF8String:"e69c05e940c5a2ac4eaaa5bc3181dc2a\n"];
+	NSString *deployment2 = [NSString stringWithUTF8String:"3c4a8517068608990d7a52880151921a\n"];
+	NSString *development = [NSString stringWithUTF8String:"1ff9a5068b5e301dc325cbe84c7a6dac\n"];
 	
 	// Deployment build
 	if([output hasSuffix:deployment1] || [output hasSuffix:deployment2])
