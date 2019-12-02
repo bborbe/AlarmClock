@@ -21,7 +21,7 @@
 // Hidden Preferences
 #define FIRST_RUN_KEY          @"FirstRun"
 #define DIGITAL_AUDIO_KEY      @"DigitalAudio"
-
+#define ALARM_SCRIPT_KEY  	   @"AlarmScript"
 
 @implementation Prefs
 
@@ -232,6 +232,11 @@
 + (BOOL)digitalAudio
 {
 	return [[NSUserDefaults standardUserDefaults] boolForKey:DIGITAL_AUDIO_KEY];
+}
+
++ (NSString*)alarmScript
+{
+	return [[NSUserDefaults standardUserDefaults] stringForKey:ALARM_SCRIPT_KEY];
 }
 
 @end

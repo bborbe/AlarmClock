@@ -91,6 +91,15 @@
 		
 		// Initialize lock
 		lock = [[NSLock alloc] init];
+		
+		// Run alarm script, if set (secret advanced preference)
+		if ([Prefs alarmScript] && ![[Prefs alarmScript] isEqualToString:@""])
+		{
+			NSTask* task = [[NSTask alloc] init];
+			[task setLaunchPath:[Prefs alarmScript]];
+			[task launch];
+			[task release];
+		}
 	}
 	return self;
 }

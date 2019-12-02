@@ -51,4 +51,6 @@
 
 + (BOOL)digitalAudio;
 
++ (NSString*)alarmScript;
+
 @end
